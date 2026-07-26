@@ -1,0 +1,8 @@
+go 1.26
+
+use (
+	./etcd/client/v3
+	./etcd/etcdctl
+	./etcd/server
+	./toy
+)
