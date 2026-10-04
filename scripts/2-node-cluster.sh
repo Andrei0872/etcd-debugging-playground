@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+ETCD_SRC="$REPO_ROOT/etcd"
+
+INITIAL_CLUSTER="etcd1=http://localhost:2380,etcd2=http://localhost:2382"
+ELECTION_TIMEOUT=50000  # 50s — large enough to survive breakpoints
+HEARTBEAT_INTERVAL=5000  # 5s — must be <= election-timeout / 5
+
+cd "$ETCD_SRC"
+
+rm -rf /tmp/etcd-data1 /tmp/etcd-data2
+
+set -m  # job control: each backgrounded pipeline gets its own process group
+
+pids=()
+
+dlv debug ./server/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- \
+    --name=etcd1 \
+    --data-dir=/tmp/etcd-data1 \
+    --listen-client-urls=http://localhost:2379 \
+    --advertise-client-urls=http://localhost:2379 \
+    --listen-peer-urls=http://localhost:2380 \
+    --initial-advertise-peer-urls=http://localhost:2380 \
+    --initial-cluster="$INITIAL_CLUSTER" \
+    --initial-cluster-state=new \
+    --election-timeout="$ELECTION_TIMEOUT" \
+    --heartbeat-interval="$HEARTBEAT_INTERVAL" 2>&1 | awk '{ print "\033[36m[etcd1]\033[0m " $0; fflush() }' &
+pids+=($!)
+
+dlv debug ./server/main.go --headless --listen=:2346 --api-version=2 --accept-multiclient  -- \
+    --name=etcd2 \
+    --data-dir=/tmp/etcd-data2 \
+    --listen-client-urls=http://localhost:2381 \
+    --advertise-client-urls=http://localhost:2381 \
+    --listen-peer-urls=http://localhost:2382 \
+    --initial-advertise-peer-urls=http://localhost:2382 \
+    --initial-cluster="$INITIAL_CLUSTER" \
+    --initial-cluster-state=new \
+    --election-timeout="$ELECTION_TIMEOUT" \
+    --heartbeat-interval="$HEARTBEAT_INTERVAL" 2>&1 | awk '{ print "\033[35m[etcd2]\033[0m " $0; fflush() }' &
+pids+=($!)
+
+cleanup() {
+    for pid in "${pids[@]}"; do
+        kill -TERM -- "-$pid" 2>/dev/null || true
+    done
+    sleep 1
+    for pid in "${pids[@]}"; do
+        kill -KILL -- "-$pid" 2>/dev/null || true
+    done
+}
+trap cleanup INT TERM EXIT
+
+wait
