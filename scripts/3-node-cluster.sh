@@ -10,7 +10,13 @@ HEARTBEAT_INTERVAL=5000  # 5s — must be <= election-timeout / 5
 
 cd "$ETCD_SRC"
 
-dlv debug ./server/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient --continue -- \
+rm -rf /tmp/etcd-data1 /tmp/etcd-data2 /tmp/etcd-data3
+
+set -m  # job control: each backgrounded pipeline gets its own process group
+
+pids=()
+
+dlv debug ./server/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- \
     --name=etcd1 \
     --data-dir=/tmp/etcd-data1 \
     --listen-client-urls=http://localhost:2379 \
@@ -21,8 +27,9 @@ dlv debug ./server/main.go --headless --listen=:2345 --api-version=2 --accept-mu
     --initial-cluster-state=new \
     --election-timeout="$ELECTION_TIMEOUT" \
     --heartbeat-interval="$HEARTBEAT_INTERVAL" 2>&1 | awk '{ print "\033[36m[etcd1]\033[0m " $0; fflush() }' &
+pids+=($!)
 
-dlv debug ./server/main.go --headless --listen=:2346 --api-version=2 --accept-multiclient --continue -- \
+dlv debug ./server/main.go --headless --listen=:2346 --api-version=2 --accept-multiclient  -- \
     --name=etcd2 \
     --data-dir=/tmp/etcd-data2 \
     --listen-client-urls=http://localhost:2381 \
@@ -33,8 +40,9 @@ dlv debug ./server/main.go --headless --listen=:2346 --api-version=2 --accept-mu
     --initial-cluster-state=new \
     --election-timeout="$ELECTION_TIMEOUT" \
     --heartbeat-interval="$HEARTBEAT_INTERVAL" 2>&1 | awk '{ print "\033[35m[etcd2]\033[0m " $0; fflush() }' &
+pids+=($!)
 
-dlv debug ./server/main.go --headless --listen=:2347 --api-version=2 --accept-multiclient --continue -- \
+dlv debug ./server/main.go --headless --listen=:2347 --api-version=2 --accept-multiclient  -- \
     --name=etcd3 \
     --data-dir=/tmp/etcd-data3 \
     --listen-client-urls=http://localhost:2383 \
@@ -45,6 +53,17 @@ dlv debug ./server/main.go --headless --listen=:2347 --api-version=2 --accept-mu
     --initial-cluster-state=new \
     --election-timeout="$ELECTION_TIMEOUT" \
     --heartbeat-interval="$HEARTBEAT_INTERVAL" 2>&1 | awk '{ print "\033[33m[etcd3]\033[0m " $0; fflush() }' &
+pids+=($!)
 
-trap 'kill $(jobs -p)' EXIT
+cleanup() {
+    for pid in "${pids[@]}"; do
+        kill -TERM -- "-$pid" 2>/dev/null || true
+    done
+    sleep 1
+    for pid in "${pids[@]}"; do
+        kill -KILL -- "-$pid" 2>/dev/null || true
+    done
+}
+trap cleanup INT TERM EXIT
+
 wait
