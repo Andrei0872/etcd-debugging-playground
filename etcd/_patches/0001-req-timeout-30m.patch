@@ -1,0 +1,25 @@
+Raise the server-side request timeout to 30 minutes.
+
+ReqTimeout() normally comes out to 5s + 2 * election timeout. While a
+request is paused at a breakpoint, the server gives up and returns
+"request timed out". The --election-timeout flag can't help here: etcd
+caps it at 50s, so the most you can get is about 105s.
+
+diff --git a/server/config/config.go b/server/config/config.go
+index 2d5513395..fdc388b93 100644
+--- a/server/config/config.go
++++ b/server/config/config.go
+@@ -318,9 +318,10 @@ func (c *ServerConfig) ShouldDiscover() bool {
+ 
+ // ReqTimeout returns timeout for request to finish.
+ func (c *ServerConfig) ReqTimeout() time.Duration {
+-	// 5s for queue waiting, computation and disk IO delay
+-	// + 2 * election timeout for possible leader election
+-	return 5*time.Second + 2*time.Duration(c.ElectionTicks*int(c.TickMs))*time.Millisecond
++	// // 5s for queue waiting, computation and disk IO delay
++	// // + 2 * election timeout for possible leader election
++	// return 5*time.Second + 2*time.Duration(c.ElectionTicks*int(c.TickMs))*time.Millisecond
++	return 30 * time.Minute;
+ }
+ 
+ func (c *ServerConfig) ElectionTimeout() time.Duration {

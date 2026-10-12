@@ -1,3 +1,4 @@
 [submodule "etcd"]
-	path = etcd
-	url = git@github.com:etcd-io/etcd.git
+	path = etcd/_upstream
+	url = https://github.com/etcd-io/etcd.git
+	ignore = dirty
