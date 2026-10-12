@@ -2,13 +2,20 @@
 
 Investigations into the internals of systems I study. Each one answers a single question with a diagram, a source-code walkthrough video, and a short write-up.
 
+All walkthrough videos are on my [YouTube channel](https://www.youtube.com/@andreigatej6704/videos).
+
 ## Repository layout
 
-- `<tool>/`: one folder per studied tool, containing one folder per investigation.
-- `<tool>/_upstream/`: the tool's source, pinned as a git submodule.
-- `<tool>/_patches/`: local changes applied on top of upstream to make debugging practical.
-- `<tool>/_scripts/`: shared scripts, such as cluster setups.
-- `<tool>/_notes/`: personal study notes and question checkpoints.
+```
+<tool>/
+├── README.md              # setup and index
+├── <slug>.md              # one file per investigation
+├── _assets/<slug>.excalidraw.svg
+├── _scripts/              # shared scripts; <slug>/ for investigation-specific ones
+├── _patches/              # changes on top of upstream that make debugging practical
+├── _notes/                # personal study notes
+└── _upstream/             # the tool's source, pinned as a git submodule
+```
 
 ## Setup
 
