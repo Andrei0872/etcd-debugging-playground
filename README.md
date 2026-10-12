@@ -1,16 +1,29 @@
-# etcd Debugging Playground
+# Under the Hood
 
-A personal playground for digging into etcd/Raft internals (MVCC, BoltDB, watch, WAL, etc.) via debugging and experimentation.
+Investigations into the internals of systems I study. Each one answers a single question with a diagram, a source-code walkthrough video, and a short write-up.
 
-## Notable directory
+## Repository layout
 
-- [`toy/questions/`](toy/questions/): checkpoints of questions asked while learning, extracted periodically. The purpose is to check my understanding by re-anwering them as I progress in my journey.
+- `<tool>/`: one folder per studied tool, containing one folder per investigation.
+- `<tool>/_upstream/`: the tool's source, pinned as a git submodule.
+- `<tool>/_patches/`: local changes applied on top of upstream to make debugging practical.
+- `<tool>/_scripts/`: shared scripts, such as cluster setups.
+- `<tool>/_notes/`: personal study notes and question checkpoints.
 
-## Debugging prerequisites
+## Setup
 
-1. `dlv`: install via
+Clone **everything** (all tools):
+
 ```bash
-go install github.com/go-delve/delve/cmd/dlv@latest
-
+git clone --recurse-submodules https://github.com/Andrei0872/under-the-hood.git
 ```
-2. Editor configuration. For Neovim, see [this dap.lua config](https://github.com/Andrei0872/dotfiles/blob/5ffb0a645aec8695ce7b10e59c285abc7381a3f7/nvim/after/plugin/dap.lua#L151-L159)
+
+Clone **specific tools** (here, only etcd):
+
+```bash
+git clone https://github.com/Andrei0872/under-the-hood.git
+cd under-the-hood
+git submodule update --init etcd/_upstream
+```
+
+To add another tool later, run `git submodule update --init <tool>/_upstream`. Each tool's README covers the rest of its setup.
