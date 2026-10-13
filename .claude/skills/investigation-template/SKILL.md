@@ -22,7 +22,7 @@ If `slug` is missing, ask for it.
 
 1. **Infer the tool** from the current working directory: it is the first path component of the cwd relative to the repo root (`git rev-parse --show-toplevel`). For example, a cwd of `<repo>/etcd` or `<repo>/etcd/_scripts` gives `etcd`. If the cwd is the repo root, or its first component starts with `_` or `.`, ask which tool to use.
 
-2. **Derive the title** from the slug: split on `-` and capitalize the first letter of each word (`how-nodes-establish-communication` → `How Nodes Establish Communication`). Leave the rest of each word unchanged.
+2. **Derive the title** from the slug in title case: split on `-` and capitalize the first letter of each word (`how-nodes-establish-communication` → `How Nodes Establish Communication`). Leave the rest of each word unchanged. Keep these words lowercase unless they are the first or last word: `a`, `an`, `the`, `and`, `but`, `or`, `nor`, `for`, `so`, `yet`, `as`, `at`, `by`, `in`, `of`, `off`, `on`, `per`, `to`, `up`, `via` (`debugging-a-local-cluster` → `Debugging a Local Cluster`).
 
 3. **Refuse to overwrite.** If `<tool>/<slug>.md` already exists, stop and tell the user.
 
