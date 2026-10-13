@@ -2,7 +2,7 @@
 
 ![debugging-in-action](_assets/debugging-a-local-cluster-5.png)
 
-[![Watch on YouTube](https://img.shields.io/badge/Watch_on-YouTube-red?logo=youtube&style=for-the-badge)]({{VIDEO_URL}})
+[![Watch on YouTube](https://img.shields.io/badge/Watch_on-YouTube-red?logo=youtube&style=for-the-badge)](https://www.youtube.com/watch?v=SFllOmqtvDQ)
 
 Other etcd write-ups in this repo assume you can pause a running cluster and step through its code. This one shows how to set that up: three etcd nodes, each running under a debugger, each with its own Neovim instance attached to it.
 
@@ -137,14 +137,6 @@ This puts the previous tips together: we pause the leader at the moment it recei
 1. Pick the Neovim instance you want to work in, and make the node it is attached to the leader. Use [Check the cluster status](#check-the-cluster-status) to find that node's ID, then [Move the leader](#move-the-leader) to it. This matters because a breakpoint set in one Neovim instance only applies to the node that instance is attached to.
 
 2. In that instance, add a breakpoint in the leader-only logic that handles a new write. In Raft, a write starts as a *proposal* (`MsgProp`), and the leader handles it in `stepLeader`: [`raft.go#L1294`](https://github.com/etcd-io/raft/blob/v3.7.0-rc.1/raft.go#L1294).
-
-   Raft lives in its own Go module (`go.etcd.io/raft/v3`), so this file is not in `_upstream`. It is in Go's module cache, which you can open directly:
-
-   ```bash
-   nvim "$(go env GOMODCACHE)/go.etcd.io/raft/v3@v3.7.0-rc.1/raft.go" +1294
-   ```
-
-   Alternatively, jump to it from etcd's code with your editor's *go to definition*.
 
 3. Perform a `put` request:
 
