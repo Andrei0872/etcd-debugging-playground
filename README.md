@@ -37,4 +37,4 @@ cd under-the-hood
 git submodule update --init etcd/_upstream
 ```
 
-To add another tool later, run `git submodule update --init <tool>/_upstream`. Each tool's README covers the rest of its setup.
+To add another tool later, run `git submodule update --init <tool>/_upstream`. Each tool's README links to its setup guide.
