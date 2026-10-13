@@ -4,6 +4,10 @@ Investigations into the internals of systems I study. Each one answers a single 
 
 All walkthrough videos are on my [YouTube channel](https://www.youtube.com/@andreigatej6704/videos).
 
+## Tools
+
+* [etcd](etcd/README.md): the distributed key-value store behind Kubernetes, built on the [Raft consensus algorithm](https://raft.github.io/raft.pdf).
+
 ## AI use
 
 This repository exists to understand in depth how software works, and to share that knowledge. The write-ups and diagrams are not AI-generated: they come from my own study and debugging. I use AI to correct grammar slips (such as "too" for "two") and to check my write-ups for technical correctness. The supporting tooling, such as scripts and setup docs, was built with AI assistance.
